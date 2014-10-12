@@ -1,0 +1,9 @@
+name: compareScreen
+description: A sample web application
+dependencies:
+  browser: any
+  worker: any
+  webgl_inspector_patch:
+    path: ../../misc/webgl_inspector_patch
+transformers:
+- webgl_inspector_patch

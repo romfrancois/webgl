@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CompareScreen</title>
+    
+    <script async type="application/dart" src="comparescreen.dart"></script>
+    <script async src="packages/browser/dart.js"></script>
+    
+    <link rel="stylesheet" href="comparescreen.css">
+    
+    <!-- vertex shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      attribute vec2 a_position;
+      attribute vec2 a_texCoord;
+  
+      uniform vec2 u_resolution;
+  
+      varying vec2 v_texCoord;
+  
+      void main() {
+        // convert the rectangle from pixels to 0.0 to 1.0
+        vec2 zeroToOne = a_position / u_resolution;
+  
+        // convert from 0->1 to 0->2
+        vec2 zeroToTwo = zeroToOne * 2.0;
+  
+        // convert from 0->2 to -1->+1 (clipspace)
+        vec2 clipSpace = zeroToTwo - 1.0;
+  
+        gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+  
+        // pass the texCoord to the fragment shader
+        // The GPU will interpolate this value between points.
+        v_texCoord = a_texCoord;
+      }
+    </script>
+    
+    <!-- fragment shader -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+  
+      // our texture
+      uniform sampler2D u_image1;
+      uniform sampler2D u_image2;
+  
+      // the texCoords passed in from the vertex shader.
+      varying vec2 v_texCoord;
+  
+      void main() {
+        gl_FragColor = texture2D(u_image1, v_texCoord);
+        gl_FragColor -= texture2D(u_image2, v_texCoord);
+        gl_FragColor *= 0.5;
+        gl_FragColor += vec4 (0.5);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>CompareScreen</h1>
+    
+    <div id='mainContainer'>
+      <div id='container_canvas'>
+        <p>Canvas</p>
+        <canvas id='canReference' width="320" height="167" style="background-color: blue"></canvas>
+        <canvas id='canScreenShot' width="320" height="167" style="background-color: blue"></canvas>
+      </div>
+      
+      <div id='container_webgl'>
+        <p>WebGL</p>
+        <canvas id='canCompare3D' style="visibility: visible;" width="320" height="167" style="background-color: gray"></canvas>
+      </div>
+    </div>
+  </body>
+</html>
